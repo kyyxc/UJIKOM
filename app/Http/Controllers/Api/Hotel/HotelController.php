@@ -48,7 +48,7 @@ class HotelController extends Controller
             'check_in_time' => 'date_format:H:i:s',
             'check_out_time' => 'date_format:H:i:s',
             'cancellation_policy' => 'nullable|string',
-            'is_active' => 'boolean',
+            'is_active' => 'required|boolean',
             'amenities' => 'array',
             'amenities.*' => 'integer|exists:amenities,id',
             'images' => 'array',

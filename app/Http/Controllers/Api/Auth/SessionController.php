@@ -39,7 +39,7 @@ class SessionController extends Controller
             return response()->json([
                 'status' => 'success',
                 'message' => 'Signin success',
-                'data' => $user
+                'user' => $user
             ], 200);
         }
 

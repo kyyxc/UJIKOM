@@ -26,14 +26,17 @@ class SignupController  extends Controller
             ], 400);
         }
 
-        $user = User::Create($validator->validated());
+        $user = User::create(array_merge(
+            $validator->validated(),
+            ['role' => 'customer']
+        ));
         $token = $user->createToken(env("SECRET_TOKEN"));
         $user['token'] = $token->plainTextToken;
 
         return response()->json([
             'status' => 'success',
             'message' => 'Signup success',
-            'data' => $user,
+            'user' => $user,
         ], 201);
     }
 }

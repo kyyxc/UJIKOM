@@ -30,6 +30,11 @@ class Hotel extends Model
         'is_active',
     ];
 
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
+
+
     public function amenities(): BelongsToMany
     {
         return $this->belongsToMany(Amenity::class, 'hotel_amenities', 'hotel_id', 'amenity_id');
@@ -38,5 +43,10 @@ class Hotel extends Model
     public function images(): HasMany
     {
         return $this->hasMany(HotelImages::class, 'hotel_id');
+    }
+
+    public function rooms(): HasMany
+    {
+        return $this->hasMany(Room::class, 'hotel_id');
     }
 }
