@@ -19,10 +19,15 @@ class HotelController extends Controller
             'data' => $hotels,
         ], 200);
     }
-
+    
     public function show(Hotel $hotel)
     {
-        $hotel->load(['amenities', 'images']);
+        $hotel->load([
+            'amenities' => fn($q) => $q->where('type', 'hotel'),
+            'images',
+            'rooms.amenities',
+            'rooms.images',
+        ]);
 
         return response()->json([
             'status' => 'success',

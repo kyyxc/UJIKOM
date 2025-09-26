@@ -8,12 +8,18 @@ use Illuminate\Http\Request;
 
 class AmenityController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $amenities = Amenity::query()
+            ->when($request->has('type'), function ($query) use ($request) {
+                $query->where('type', $request->get('type'));
+            })
+            ->get();
+
         return response()->json([
             'status' => 'success',
-            'message' => 'Get all amenity success',
-            'data' => Amenity::all(),
+            'message' => 'Get amenities success',
+            'data' => $amenities,
         ], 200);
     }
 }

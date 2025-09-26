@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Hotel extends Model
 {
@@ -42,11 +43,21 @@ class Hotel extends Model
 
     public function images(): HasMany
     {
-        return $this->hasMany(HotelImages::class, 'hotel_id');
+        return $this->hasMany(HotelImage::class, 'hotel_id');
     }
 
     public function rooms(): HasMany
     {
         return $this->hasMany(Room::class, 'hotel_id');
+    }
+
+    public function owner(): HasOne
+    {
+        return $this->hasOne(Owner::class);
+    }
+
+    public function receptionists(): HasMany
+    {
+        return $this->hasMany(Receptionist::class);
     }
 }

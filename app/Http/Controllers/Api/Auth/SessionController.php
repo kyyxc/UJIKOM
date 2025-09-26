@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Validator;
 
 class SessionController extends Controller
 {
-      public function signin(Request $request)
+    public function signin(Request $request)
     {
         $validate = Validator::make($request->all(), [
             'email' => 'required',
@@ -34,12 +34,18 @@ class SessionController extends Controller
         }
 
         if (Auth::attempt($request->only(['email', 'password']))) {
-            $token = $user->createToken(env("SECRET_TOKEN"));
-            $user['token'] = $token->plainTextToken;
+            $token = $user->createToken("dsgjkdflgjkldgege");
             return response()->json([
                 'status' => 'success',
                 'message' => 'Signin success',
-                'user' => $user
+                'user' => [
+                    'id' => $user->id,
+                    'email' => $user->email,
+                    'first_name' => $user->first_name,
+                    'last_name' => $user->last_name,
+                    'role' => $user->role,
+                    'token' => $token->plainTextToken,
+                ],
             ], 200);
         }
 

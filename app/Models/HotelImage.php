@@ -5,10 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class HotelImages extends Model
+class HotelImage extends Model
 {
-    /** @use HasFactory<\Database\Factories\HotelImagesFactory> */
     use HasFactory;
 
+    protected $table = 'hotel_images';
     protected $guarded = ['id'];
 }

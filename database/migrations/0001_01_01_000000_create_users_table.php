@@ -20,7 +20,6 @@ return new class extends Migration
             $table->string('address')->nullable();
             $table->timestamp('date_of_birth')->nullable();
             $table->string('profile', 255)->nullable();
-            $table->enum('role', ['customer', 'admin', 'receptionist', 'owner']);
             $table->rememberToken();
             $table->timestamps();
         });

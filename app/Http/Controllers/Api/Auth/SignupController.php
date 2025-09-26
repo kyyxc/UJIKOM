@@ -30,13 +30,10 @@ class SignupController  extends Controller
             $validator->validated(),
             ['role' => 'customer']
         ));
-        $token = $user->createToken(env("SECRET_TOKEN"));
-        $user['token'] = $token->plainTextToken;
 
         return response()->json([
             'status' => 'success',
             'message' => 'Signup success',
-            'user' => $user,
         ], 201);
     }
 }

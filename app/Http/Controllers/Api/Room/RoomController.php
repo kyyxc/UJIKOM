@@ -12,22 +12,32 @@ class RoomController extends Controller
 {
     public function store(RoomRequest $request)
     {
-        $room = Room::create($request->only([
-            'hotel_id',
-            'room_number',
-            'room_type',
-            'description',
-            'capacity',
-            'price_per_night',
-            'status'
-        ]));
+        // ambil nomor room terakhir dari hotel ini
+        $lastRoomNumber = Room::where('hotel_id', $request->hotel_id)
+            ->orderByDesc('id')
+            ->value('room_number');
 
+        // jika belum ada room, mulai dari 1
+        $nextRoomNumber = $lastRoomNumber ? intval($lastRoomNumber) + 1 : 1;
+
+        $room = Room::create([
+            'hotel_id'       => $request->hotel_id,
+            'room_number'    => $nextRoomNumber,
+            'room_type'      => $request->room_type,
+            'description'    => $request->description,
+            'capacity'       => $request->capacity,
+            'price_per_night' => $request->price_per_night,
+            'status'         => $request->status ?? 'available',
+        ]);
+
+        // amenities
         if ($request->filled('amenities')) {
             $room->amenities()->sync($request->amenities);
         }
 
+        // images multiple
         if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $index => $file) {
+            foreach ($request->file('images') as $file) {
                 $path = $file->store('room_images', 'public');
                 $room->images()->create([
                     'image_url' => $path,
@@ -35,7 +45,11 @@ class RoomController extends Controller
             }
         }
 
-        return response()->json($room->load(['amenities', 'images']), 201);
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Room created successfully',
+            'data' => $room->load(['amenities', 'images']),
+        ], 201);
     }
 
     public function show(Room $room)
