@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Receptionist;
+namespace App\Http\Controllers\Api\Receptionist;
 
 use App\Http\Controllers\Controller;
 use App\Models\Room;

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('password');
             $table->string('first_name');
             $table->string('last_name');
+            $table->string('phone')->nullable();
             $table->string('address')->nullable();
             $table->timestamp('date_of_birth')->nullable();
             $table->string('profile', 255)->nullable();

@@ -27,9 +27,9 @@ class Booking extends Model
 
 
     // Relasi ke User (Online Booking)
-    public function user()
+    public function guest()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     // Relasi ke Receptionist (Offline Booking)
@@ -48,5 +48,16 @@ class Booking extends Model
     public function hotel()
     {
         return $this->belongsTo(Hotel::class);
+    }
+
+    public function payment()
+    {
+        return $this->hasOne(Payment::class, 'booking_id');
+    }
+
+
+    public function invoice()
+    {
+        return $this->HasOne(Invoice::class, 'booking_id');
     }
 }

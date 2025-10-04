@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers\Receptionist;
+namespace App\Http\Controllers\Api\Receptionist;
 
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
+use App\Models\Payment;
 use App\Models\Room;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,7 +22,6 @@ class ReceptionistBookingController extends Controller
 
         $bookings = Booking::with('room')
             ->where('hotel_id', $receptionist->hotel_id)
-            ->where('source', 'online') // hanya booking online
             ->latest()
             ->get();
 
@@ -37,58 +37,58 @@ class ReceptionistBookingController extends Controller
         }));
     }
 
-    public function store(Request $request)
+    // BookingController.php
+    public function booking(Request $request)
     {
-        // Validasi menggunakan Validator facade
-        $validator = Validator::make($request->all(), [
-            'room_id'       => 'required|exists:rooms,id',
-            'guest_name'    => 'required|string|max:255',
-            'guest_email'   => 'nullable|email',
-            'guest_phone'   => 'nullable|string|max:20',
+        $validated = $request->validate([
+            'guest_name' => 'required|string|max:255',
+            'guest_email' => 'nullable|email',
+            'guest_phone' => 'nullable|string',
+            'room_id' => 'required|exists:rooms,id',
             'check_in_date' => 'required|date',
             'check_out_date' => 'required|date|after:check_in_date',
+            'total_price' => 'required|numeric',
+            'source' => 'required|in:online,offline',
+            'status' => 'required|in:pending,confirmed,booked,checked_in,checked_out,cancelled',
         ]);
 
-        // Jika validasi gagal, return JSON error
-        if ($validator->fails()) {
-            return response()->json([
-                'message' => 'Validasi gagal',
-                'errors'  => $validator->errors()
-            ], 422);
-        }
+        // Get receptionist ID from authenticated user
+        $receptionistId = $request->user()->receptionist->id;
+        $hotelId = $request->user()->receptionist->hotel_id;
 
-        $room = Room::findOrFail($request->room_id);
-
-        // Hitung total harga
-        $days = (new \DateTime($request->check_in_date))
-            ->diff(new \DateTime($request->check_out_date))
-            ->days;
-
-        $totalPrice = $room->price_per_night * $days;
-
-        // Buat booking langsung
         $booking = Booking::create([
-            'user_id'         => null, // karena offline
-            'receptionist_id' => Auth::user()->receptionist->id, // receptionist yg login
-            'room_id'         => $room->id,
-            'hotel_id'        => Auth::user()->receptionist->hotel_id,
-            'guest_name'      => $request->guest_name,
-            'guest_email'     => $request->guest_email,
-            'guest_phone'     => $request->guest_phone,
-            'check_in_date'   => $request->check_in_date,
-            'check_out_date'  => $request->check_out_date,
-            'status'          => 'booked',   // langsung booked
-            'source'          => 'offline',  // tandai offline booking
-            'total_price'     => $totalPrice,
+            ...$validated,
+            'receptionist_id' => $receptionistId,
+            'hotel_id' => $hotelId,
+            'user_id' => null, // Offline booking
         ]);
 
-        // Ubah status room jadi occupied
-        $room->update(['status' => 'occupied']);
+        // Update room status to occupied
+        Room::where('id', $validated['room_id'])->update(['status' => 'occupied']);
 
         return response()->json([
-            'message' => 'Booking berhasil dibuat oleh receptionist',
-            'booking' => $booking,
+            'message' => 'Booking created successfully',
+            'booking' => $booking
+        ], 201);
+    }
+
+    public function payment(Request $request)
+    {
+        $validated = $request->validate([
+            'booking_id' => 'required|exists:bookings,id',
+            'payment_method' => 'required|string',
+            'amount' => 'required|numeric',
+            'status' => 'required|in:pending,paid,failed,cancelled,expired,refunded',
+            'midtrans_order_id' => 'required|string|unique:payments,midtrans_order_id',
+            'transaction_date' => 'nullable|date',
         ]);
+
+        $payment = Payment::create($validated);
+
+        return response()->json([
+            'message' => 'Payment processed successfully',
+            'payment' => $payment
+        ], 201);
     }
 
     public function checkIn($id)

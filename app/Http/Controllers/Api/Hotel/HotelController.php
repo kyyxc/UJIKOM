@@ -9,9 +9,39 @@ use Illuminate\Support\Facades\Validator;
 
 class HotelController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $hotels = Hotel::with(['amenities', 'images'])->paginate(10);
+        $query = Hotel::with(['amenities', 'images']);
+
+        // Search
+        if ($request->has('search') && $request->search) {
+            $query->where('name', 'like', '%' . $request->search . '%')
+                ->orWhere('city', 'like', '%' . $request->search . '%');
+        }
+
+        // Rating
+        if ($request->has('rating') && $request->rating) {
+            $query->where('star_rating', '>=', (int) $request->rating);
+        }
+
+        // Price (contoh kalau ada relasi rooms)
+        if ($request->has('price') && $request->price) {
+            if ($request->price === 'low') {
+                $query->orderBy('star_rating', 'asc');
+            } elseif ($request->price === 'high') {
+                $query->orderBy('star_rating', 'desc');
+            }
+        }
+
+        // Facilities
+        if ($request->has('facilities') && $request->facilities) {
+            $facilities = explode(',', $request->facilities);
+            $query->whereHas('amenities', function ($q) use ($facilities) {
+                $q->whereIn('name', $facilities);
+            });
+        }
+
+        $hotels = $query->paginate(10);
 
         return response()->json([
             'status' => 'success',
@@ -19,7 +49,8 @@ class HotelController extends Controller
             'data' => $hotels,
         ], 200);
     }
-    
+
+
     public function show(Hotel $hotel)
     {
         $hotel->load([

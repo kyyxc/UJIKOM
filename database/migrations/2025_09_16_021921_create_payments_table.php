@@ -31,7 +31,6 @@ return new class extends Migration
                 'refunded'     // dana dikembalikan
             ])->default('pending');
 
-            // 🔑 field tambahan khusus Midtrans
             $table->string('midtrans_order_id')->unique(); // order_id dari Midtrans
             $table->string('midtrans_transaction_id')->nullable(); // transaction_id dari Midtrans
             $table->string('midtrans_va_number')->nullable(); // kalau pakai VA bank transfer

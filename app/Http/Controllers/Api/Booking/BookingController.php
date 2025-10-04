@@ -4,18 +4,21 @@ namespace App\Http\Controllers\Api\Booking;
 
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
+use App\Models\Invoice;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class BookingController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Booking::with(['user', 'hotel', 'room']);
+        $query = Booking::with(['guest', 'hotel', 'room.images'])
+            ->where('status', '!=', 'booked')->latest(); // ❌ exclude booked
 
         // Optional search
         if ($request->has('search') && !empty($request->search)) {
             $search = $request->search;
-            $query->whereHas('user', function ($q) use ($search) {
+            $query->whereHas('guest', function ($q) use ($search) {
                 $q->where('first_name', 'like', "%$search%")
                     ->orWhere('last_name', 'like', "%$search%")
                     ->orWhere('email', 'like', "%$search%");
@@ -41,18 +44,104 @@ class BookingController extends Controller
         ]);
     }
 
-    public function show(Booking $booking)
+    public function show($id)
     {
-        $booking->load(['room', 'hotel']);
-        // $booking = Booking::with(['room', 'hotel'])->find($id);
+        $booking = Booking::with([
+            'hotel',
+            'room.images',
+            'room.amenities',
+            'guest',
+            'payment'
+        ])->findOrFail($id);
 
         return response()->json([
-            'id'           => $booking->id,
-            'guest_name'   => $booking->guest_name,
-            'room'         => $booking->room->room_number . ' - ' . ucfirst($booking->room->room_type),
-            'check_in_date' => $booking->check_in_date,
-            'check_out_date' => $booking->check_out_date,
-            'status'       => $booking->status,
+            'success' => true,
+            'data' => $booking,
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'room_id'        => 'required|exists:rooms,id',
+            'hotel_id'       => 'required|exists:hotels,id',
+            'check_in_date'  => 'required|date|after_or_equal:today',
+            'check_out_date' => 'required|date|after:check_in_date',
+            'total_price'    => 'required|numeric|min:0',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Validation failed',
+                'errors'  => $validator->errors(),
+            ], 422);
+        }
+
+        $user = $request->user();
+
+        $booking = Booking::create([
+            'user_id'        => $user->id,
+            'room_id'        => $request->room_id,
+            'hotel_id'       => $request->hotel_id,
+            'guest_name' => trim($user->first_name . ' ' . ($user->last_name ?? '')),
+            'guest_email'    => $user->email,
+            'guest_phone'    => $user->phone ?? null,
+            'check_in_date'  => $request->check_in_date,
+            'check_out_date' => $request->check_out_date,
+            'status'         => 'pending',
+            'source'         => 'online',
+            'total_price'    => $request->total_price,
+        ]);
+
+        $invoiceNumber = 'INV-' . date('Ymd') . '-' . strtoupper(uniqid());
+
+        $invoice = Invoice::create([
+            'booking_id'     => $booking->id,
+            'invoice_number' => $invoiceNumber,
+            'amount'         => $booking->total_price,
+            'invoice_date'   => now(),
+        ]);
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Booking created successfully',
+            'data'    => $booking,
+        ], 201);
+    }
+
+    public function destroy(Booking $booking, Request $request)
+    {
+        // Cek apakah booking sudah dibatalkan / selesai
+        if ($booking->status === 'cancelled' || $booking->status === 'completed') {
+            return response()->json([
+                'message' => 'Booking tidak bisa dibatalkan.',
+                'data' => $booking
+            ], 400);
+        }
+
+        // Update status booking jadi cancelled
+        $booking->update([
+            'status' => 'cancelled',
+        ]);
+
+        // Kalau ada payment → update status payment juga
+        if ($booking->payment) {
+            $booking->payment->update([
+                'status' => 'cancelled',
+            ]);
+        }
+
+        // Kalau ada room → ubah status room jadi "available" lagi
+        if ($booking->room) {
+            $booking->room->update([
+                'status' => 'available',
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Booking berhasil dibatalkan.',
+            'data' => $booking->load(['room', 'hotel', 'guest', 'payment'])
         ]);
     }
 }

@@ -13,12 +13,24 @@ return new class extends Migration
     {
         Schema::create('invoices', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(App\Models\Booking::class, 'booking_id')->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(App\Models\Booking::class, 'booking_id')
+                ->constrained()
+                ->cascadeOnDelete();
+
+            $table->foreignIdFor(App\Models\Payment::class, 'payment_id')
+                ->nullable()
+                ->constrained()
+                ->cascadeOnDelete();
+
+            // Nomor invoice unik
             $table->string('invoice_number')->unique();
-            $table->date('issue_date');
-            $table->date('due_date');
-            $table->decimal('amount', 10, 2);
-            $table->enum('status', ['issued', 'paid', 'cancelled'])->default('issued');
+
+            // Nominal invoice (biasanya sama dengan total_price booking / payment->amount)
+            $table->decimal('amount', 12, 2);
+
+            // Tanggal invoice diterbitkan
+            $table->date('invoice_date')->default(now());
+
             $table->timestamps();
         });
     }
