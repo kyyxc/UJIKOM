@@ -15,6 +15,15 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
+        $user = $request->user();
+
+        if (!$user || !$user->admin()->exists()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Access denied. Admin only.',
+            ], 403);
+        }
+
         return $next($request);
     }
 }

@@ -26,7 +26,7 @@ class SignupController  extends Controller
             ], 400);
         }
 
-        $user = User::create(array_merge(
+        User::create(array_merge(
             $validator->validated(),
             ['role' => 'customer']
         ));

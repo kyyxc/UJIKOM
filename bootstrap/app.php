@@ -14,6 +14,13 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->appendToGroup('api', \Illuminate\Http\Middleware\HandleCors::class);
+
+        $middleware->alias([
+            'admin' => \App\Http\Middleware\AdminMiddleware::class,
+            'owner' => \App\Http\Middleware\OwnerMiddleware::class,
+            'receptionist' => \App\Http\Middleware\ReceptionistMiddleware::class,
+            'customer' => \App\Http\Middleware\CustomerMiddleware::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

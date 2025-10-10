@@ -15,6 +15,15 @@ class OwnerMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
+        $user = $request->user();
+
+        if (!$user || !$user->owner()->exists()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Access denied. Owner only.',
+            ], 403);
+        }
+
         return $next($request);
     }
 }

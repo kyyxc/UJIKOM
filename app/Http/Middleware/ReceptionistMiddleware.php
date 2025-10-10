@@ -15,6 +15,15 @@ class ReceptionistMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
+        $user = $request->user();
+
+        if (!$user || !$user->receptionist()->exists()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Access denied. Receptionist only.',
+            ], 403);
+        }
+
         return $next($request);
     }
 }

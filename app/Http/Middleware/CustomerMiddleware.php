@@ -15,6 +15,20 @@ class CustomerMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
+        $user = $request->user();
+
+        $isAdmin = $user && $user->admin()->exists();
+        $isOwner = $user && $user->owner()->exists();
+        $isReceptionist = $user && $user->receptionist()->exists();
+
+        // Customer = bukan admin, owner, atau receptionist
+        if (!$user || $isAdmin || $isOwner || $isReceptionist) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Access denied. Customer only.',
+            ], 403);
+        }
+
         return $next($request);
     }
 }

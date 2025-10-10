@@ -20,7 +20,7 @@ class HotelSeeder extends Seeder
         $roomAmenities  = Amenity::where('type', 'room')->pluck('id')->toArray();
 
         // Buat 5 hotel dulu (bisa diubah jadi 20)
-        for ($i = 1; $i <= 1; $i++) {
+        for ($i = 1; $i <= 20; $i++) {
             $hotel = Hotel::create([
                 'name' => "Grand Luxury Hotel {$i}",
                 'description' => "Hotel mewah nomor {$i} dengan fasilitas modern.",

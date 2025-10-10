@@ -14,4 +14,8 @@ class Receptionist extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function hotel(): BelongsTo
+    {
+        return $this->belongsTo(Hotel::class, 'hotel_id');
+    }
 }

@@ -57,7 +57,7 @@ class UserSeeder extends Seeder
 
             Receptionist::create([
                 'user_id' => $user->id,
-                'hotel_id' => $faker->randomElement($hotelIds),
+                'hotel_id' => $i,
             ]);
         }
 
@@ -78,7 +78,7 @@ class UserSeeder extends Seeder
 
             Owner::create([
                 'user_id' => $user->id,
-                'hotel_id' => $faker->randomElement($hotelIds),
+                'hotel_id' => $i,
             ]);
         }
 
