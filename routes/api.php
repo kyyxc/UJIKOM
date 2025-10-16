@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\Receptionist\ReceptionistDashboardController;
 use App\Http\Controllers\Api\Receptionist\ReceptionistGuestController;
 use App\Http\Controllers\Api\Receptionist\ReceptionistRoomController;
 use App\Http\Controllers\Api\Room\RoomController;
+use App\Http\Controllers\Api\UserProfileController;
 use App\Http\Controllers\PaymentController;
 use App\Models\Payment;
 use Illuminate\Support\Facades\Route;
@@ -23,6 +24,14 @@ Route::group(['prefix' => 'auth'], function () {
     Route::post('/signout', [App\Http\Controllers\Api\Auth\SessionController::class, 'signout'])->middleware('auth:sanctum');
 });
 
+// User Profile (accessible by all authenticated users)
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/user/profile', [UserProfileController::class, 'show']);
+    Route::post('/user/profile', [UserProfileController::class, 'update']);
+    Route::delete('/user/profile/picture', [UserProfileController::class, 'deleteProfilePicture']);
+    Route::post('/user/change-password', [UserProfileController::class, 'changePassword']);
+});
+
 // Role user
 Route::middleware(['auth:sanctum', 'customer'])->group(function () {
     // User get hotels
@@ -31,7 +40,7 @@ Route::middleware(['auth:sanctum', 'customer'])->group(function () {
             'status'  => 'error',
             'message' => 'Hotel not found',
         ], 404);
-    });
+    })->withoutMiddleware(['auth:sanctum', 'customer']);
 
     // User get rooms
     Route::apiResource('rooms', RoomController::class)->missing(function () {

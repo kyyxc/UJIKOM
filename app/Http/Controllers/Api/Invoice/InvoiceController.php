@@ -22,6 +22,7 @@ class InvoiceController extends Controller
             $invoice = Invoice::with([
                 'booking.hotel',
                 'booking.room',
+                'booking.room.images',
                 'payment'
             ])->findOrFail($id);
 
