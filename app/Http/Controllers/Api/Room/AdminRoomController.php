@@ -38,7 +38,7 @@ class AdminRoomController extends Controller
         // images multiple
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $file) {
-                $path = $file->store('room_images', 'public');
+                $path = $file->store('rooms', 'public');
                 $room->images()->create([
                     'image_url' => $path,
                 ]);
@@ -80,7 +80,7 @@ class AdminRoomController extends Controller
             }
 
             foreach ($request->file('images') as $index => $file) {
-                $path = $file->store('room_images', 'public');
+                $path = $file->store('rooms', 'public');
                 $room->images()->create([
                     'image_url' => $path,
                 ]);

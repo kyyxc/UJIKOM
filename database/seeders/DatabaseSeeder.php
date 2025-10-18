@@ -15,6 +15,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             AmenitySeeder::class,
             HotelSeeder::class,
+            HotelImageSeeder::class,
+            RoomImageSeeder::class,
             Userseeder::class,
             // BookingSeeder::class,
         ]);

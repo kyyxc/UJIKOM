@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -164,14 +165,14 @@ class UserProfileController extends Controller
         }
 
         // Verify current password
-        if (!\Hash::check($request->current_password, $user->password)) {
+        if (!Hash::check($request->current_password, $user->password)) {
             return response()->json([
                 'message' => 'Current password is incorrect'
             ], 422);
         }
 
         // Update password
-        $user->password = \Hash::make($request->new_password);
+        $user->password = Hash::make($request->new_password);
         $user->save();
 
         return response()->json([
