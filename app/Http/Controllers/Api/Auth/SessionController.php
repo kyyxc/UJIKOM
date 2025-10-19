@@ -44,6 +44,7 @@ class SessionController extends Controller
                     'first_name' => $user->first_name,
                     'last_name' => $user->last_name,
                     'role' => $user->role,
+                    'profile' => $user->profile,
                     'token' => $token->plainTextToken,
                 ],
             ], 200);
