@@ -6,13 +6,14 @@ use App\Http\Controllers\Api\Amenity\AmenityController;
 use App\Http\Controllers\Api\Booking\BookingController;
 use App\Http\Controllers\Api\Hotel\HotelController;
 use App\Http\Controllers\Api\Invoice\InvoiceController;
+use App\Http\Controllers\Api\Payment\PaymentController;
 use App\Http\Controllers\Api\Receptionist\ReceptionistBookingController;
 use App\Http\Controllers\Api\Receptionist\ReceptionistDashboardController;
 use App\Http\Controllers\Api\Receptionist\ReceptionistGuestController;
 use App\Http\Controllers\Api\Receptionist\ReceptionistRoomController;
 use App\Http\Controllers\Api\Room\RoomController;
 use App\Http\Controllers\Api\UserProfileController;
-use App\Http\Controllers\PaymentController;
+
 use App\Models\Payment;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
@@ -58,9 +59,6 @@ Route::middleware(['auth:sanctum', 'customer'])->group(function () {
         ], 404);
     });
 
-    // Amenity for hotels and rooms
-    Route::get('/amenities', [AmenityController::class, 'index']);
-
     // User booking hotel
     Route::post('/bookings/{id}/pay', [PaymentController::class, 'create']);
     Route::post('/payments/callback', [PaymentController::class, 'callback']);
@@ -97,6 +95,9 @@ Route::post('/payments/test-success/{payment}', function (Payment $payment) {
         'payment' => $payment->load('booking.room'),
     ]);
 });
+
+// Amenity for hotels and rooms
+Route::get('/amenities', [AmenityController::class, 'index']);
 
 
 require __DIR__ . '/api_admin.php';

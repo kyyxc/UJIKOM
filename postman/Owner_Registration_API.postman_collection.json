@@ -1,0 +1,353 @@
+{
+  "info": {
+    "name": "Owner Registration API",
+    "description": "API Collection untuk testing proses registrasi owner hotel dengan 5 step",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Owner Registration",
+      "item": [
+        {
+          "name": "Step 1 - Register Account",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set('owner_token', jsonData.data.token);",
+                  "    pm.environment.set('owner_id', jsonData.data.owner_id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"John\",\n  \"last_name\": \"Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\",\n  \"phone\": \"+62812345678\",\n  \"address\": \"Jl. Sudirman No. 123, Jakarta\",\n  \"date_of_birth\": \"1990-01-15\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/owner/register/step-1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "owner", "register", "step-1"]
+            }
+          }
+        },
+        {
+          "name": "Step 2 - Hotel Basic Info",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{owner_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Grand Hotel Jakarta\",\n  \"description\": \"Hotel bintang 5 di pusat kota Jakarta dengan fasilitas lengkap dan pemandangan kota yang menakjubkan\",\n  \"address\": \"Jl. MH Thamrin No. 1\",\n  \"city\": \"Jakarta\",\n  \"state_province\": \"DKI Jakarta\",\n  \"country\": \"Indonesia\",\n  \"latitude\": -6.200000,\n  \"longitude\": 106.816666,\n  \"email\": \"info@grandhotel.com\",\n  \"phone\": \"+6221123456\",\n  \"website\": \"https://grandhotel.com\",\n  \"star_rating\": 5,\n  \"check_in_time\": \"14:00\",\n  \"check_out_time\": \"12:00\",\n  \"cancellation_policy\": \"Free cancellation up to 24 hours before check-in\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/owner/register/step-2",
+              "host": ["{{base_url}}"],
+              "path": ["api", "owner", "register", "step-2"]
+            }
+          }
+        },
+        {
+          "name": "Step 3 - Amenities & Images",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{owner_token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "amenities[0]",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "amenities[1]",
+                  "value": "2",
+                  "type": "text"
+                },
+                {
+                  "key": "amenities[2]",
+                  "value": "5",
+                  "type": "text"
+                },
+                {
+                  "key": "images[0]",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "images[1]",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "images_order[0]",
+                  "value": "0",
+                  "type": "text"
+                },
+                {
+                  "key": "images_order[1]",
+                  "value": "1",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/owner/register/step-3",
+              "host": ["{{base_url}}"],
+              "path": ["api", "owner", "register", "step-3"]
+            }
+          }
+        },
+        {
+          "name": "Step 4 - Banking & Documents",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{owner_token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "bank_name",
+                  "value": "Bank BCA",
+                  "type": "text"
+                },
+                {
+                  "key": "account_number",
+                  "value": "1234567890",
+                  "type": "text"
+                },
+                {
+                  "key": "account_holder_name",
+                  "value": "John Doe",
+                  "type": "text"
+                },
+                {
+                  "key": "business_license_number",
+                  "value": "1234/SIUP/2024",
+                  "type": "text"
+                },
+                {
+                  "key": "business_license_file",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "tax_id_number",
+                  "value": "12.345.678.9-012.000",
+                  "type": "text"
+                },
+                {
+                  "key": "tax_id_file",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "identity_card_file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/owner/register/step-4",
+              "host": ["{{base_url}}"],
+              "path": ["api", "owner", "register", "step-4"]
+            }
+          }
+        },
+        {
+          "name": "Step 5 - Submit",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{owner_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/owner/register/step-5",
+              "host": ["{{base_url}}"],
+              "path": ["api", "owner", "register", "step-5"]
+            }
+          }
+        },
+        {
+          "name": "Get Registration Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{owner_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/owner/register/status",
+              "host": ["{{base_url}}"],
+              "path": ["api", "owner", "register", "status"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin - Owner Approval",
+      "item": [
+        {
+          "name": "Get All Registrations",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/owner-registrations?status=completed",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "owner-registrations"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "completed"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Registration Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/owner-registrations/{{owner_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "owner-registrations", "{{owner_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Approve Registration",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/owner-registrations/{{owner_id}}/approve",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "owner-registrations", "{{owner_id}}", "approve"]
+            }
+          }
+        },
+        {
+          "name": "Reject Registration",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rejection_reason\": \"Dokumen SIUP tidak valid. Mohon upload ulang dengan dokumen yang benar.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/owner-registrations/{{owner_id}}/reject",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "owner-registrations", "{{owner_id}}", "reject"]
+            }
+          }
+        },
+        {
+          "name": "Get Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/owner-registrations/statistics",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "owner-registrations", "statistics"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "owner_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "admin_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "owner_id",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

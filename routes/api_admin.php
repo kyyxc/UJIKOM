@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\Admin\AdminDashboardController;
 use App\Http\Controllers\Api\Admin\AdminHotelController;
 use App\Http\Controllers\Api\Admin\AdminUserController;
+use App\Http\Controllers\Api\Admin\OwnerApprovalController;
 use App\Http\Controllers\Api\Booking\BookingController;
 use App\Http\Controllers\Api\Room\AdminRoomController;
 use Illuminate\Support\Facades\Route;
@@ -51,4 +52,27 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     });
 
     Route::apiResource('users', AdminUserController::class);
+
+    // Owner Registration Management Routes
+    Route::prefix('owner-registrations')->group(function () {
+        // Statistics & Analysis
+        Route::get('/statistics', [OwnerApprovalController::class, 'statistics']);
+        Route::get('/waiting-analysis', [OwnerApprovalController::class, 'waitingAnalysis']);
+        
+        // Lists & Search
+        Route::get('/', [OwnerApprovalController::class, 'index']);
+        Route::get('/recent', [OwnerApprovalController::class, 'recent']);
+        Route::get('/search', [OwnerApprovalController::class, 'search']);
+        Route::get('/history', [OwnerApprovalController::class, 'history']);
+        
+        // Bulk Actions
+        Route::post('/bulk-approve', [OwnerApprovalController::class, 'bulkApprove']);
+        Route::post('/bulk-reject', [OwnerApprovalController::class, 'bulkReject']);
+        
+        // Detail & Actions
+        Route::get('/{id}', [OwnerApprovalController::class, 'show']);
+        Route::post('/{id}/approve', [OwnerApprovalController::class, 'approve']);
+        Route::post('/{id}/reject', [OwnerApprovalController::class, 'reject']);
+        Route::get('/{id}/download/{document_type}', [OwnerApprovalController::class, 'downloadDocument']);
+    });
 });
