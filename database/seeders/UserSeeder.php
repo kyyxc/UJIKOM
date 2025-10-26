@@ -45,7 +45,7 @@ class UserSeeder extends Seeder
          */
         for ($i = 1; $i <= 5; $i++) {
             $user = User::create([
-                'email' => "receptionist{$i}@example.com",
+                'email' => "r   eceptionist{$i}@example.com",
                 'password' => Hash::make('password123'),
                 'first_name' => $faker->firstName,
                 'last_name' => $faker->lastName,

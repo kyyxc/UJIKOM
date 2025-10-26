@@ -103,9 +103,17 @@ class HotelController extends Controller
             $query->where('city', 'like', '%' . $request->city . '%');
         }
 
-        // Filter by country
+        // Filter by country (exact match or partial)
         if ($request->has('country') && $request->country) {
-            $query->where('country', 'like', '%' . $request->country . '%');
+            $country = $request->country;
+            $query->where(function ($q) use ($country) {
+                // Try exact match first
+                $q->where('country', $country)
+                  // Then try case-insensitive LIKE
+                  ->orWhereRaw('LOWER(country) = LOWER(?)', [$country])
+                  // Finally try partial match
+                  ->orWhere('country', 'like', '%' . $country . '%');
+            });
         }
 
         // Filter by facilities/amenities
@@ -183,6 +191,7 @@ class HotelController extends Controller
                 'min_price' => $request->min_price,
                 'max_price' => $request->max_price,
                 'city' => $request->city,
+                'country' => $request->country,
                 'facilities' => $request->facilities,
             ],
         ], 200);

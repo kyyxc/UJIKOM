@@ -41,6 +41,10 @@ class PaymentController extends Controller
             ]);
         }
 
+        $booking->invoice()->update([
+            'payment_id' => $payment->id,
+        ]);
+
         // hitung nights
         $nights = $booking->check_in_date && $booking->check_out_date
             ? Carbon::parse($booking->check_in_date)->diffInDays(Carbon::parse($booking->check_out_date))

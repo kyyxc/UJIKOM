@@ -99,6 +99,9 @@ Route::post('/payments/test-success/{payment}', function (Payment $payment) {
 // Amenity for hotels and rooms
 Route::get('/amenities', [AmenityController::class, 'index']);
 
+// Countries endpoint (frontend country selector)
+Route::get('/countries', [App\Http\Controllers\Api\CountryController::class, 'index']);
+
 
 require __DIR__ . '/api_admin.php';
 require __DIR__ . '/api_owner.php';
