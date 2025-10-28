@@ -13,17 +13,26 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
+            // 1. Seed Master Data
+            CountrySeeder::class,
             AmenitySeeder::class,
-            CountrySeeder::class, // Seed countries first
-            // HotelSeeder::class, // Old seeder - replaced by OwnerHotelRegistrationSeeder
-            // HotelImageSeeder::class, // Handled by OwnerHotelRegistrationSeeder
-            // RoomImageSeeder::class, // Handled by OwnerHotelRegistrationSeeder
-            HotelByCountrySeeder::class, // Seed hotels across different countries
-            RoomByCountrySeeder::class, // Seed rooms for each hotel
-            RoomImageByCountrySeeder::class, // Seed images for each room
-            OwnerHotelRegistrationSeeder::class, // New seeder with owner registration flow
-            Userseeder::class, // Keep for admin/receptionist users
-            // BookingSeeder::class,
+            
+            // 2. Seed Users by Role
+            AdminSeeder::class,
+            CustomerSeeder::class,
+            OwnerSeeder::class,
+            
+            // 3. Seed Hotels (will assign owners to hotels)
+            HotelSeeder::class,
+            
+            // 4. Seed Receptionists (after hotels are created)
+            ReceptionistSeeder::class,
+            
+            // 5. Seed Rooms (after hotels are created)
+            RoomSeeder::class,
+            
+            // 6. Seed Bookings (optional - can be commented out)
+            BookingSeeder::class,
         ]);
     }
 }

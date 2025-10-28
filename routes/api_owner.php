@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\Owner\OwnerDashboardController;
 use App\Http\Controllers\Api\Owner\OwnerRegistrationController;
 use App\Http\Controllers\Api\Owner\OwnerHotelController;
 use App\Http\Controllers\Api\Owner\OwnerRoomController;
+use App\Http\Controllers\Api\Owner\ReceptionistManagementController;
 
 // Owner Registration Routes (public - no auth required for step 1)
 Route::prefix('register')->group(function () {
@@ -72,6 +73,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::put('/{id}', [OwnerRoomController::class, 'update']); // Update room (including images & amenities)
         Route::delete('/{id}', [OwnerRoomController::class, 'destroy']); // Delete room
         Route::patch('/{id}/status', [OwnerRoomController::class, 'updateStatus']); // Update room status
+    });
+    
+    // Receptionist Management Routes
+    Route::prefix('receptionists')->group(function () {
+        Route::get('/', [ReceptionistManagementController::class, 'index']); // Get all receptionists
+        Route::post('/', [ReceptionistManagementController::class, 'store']); // Create new receptionist
+        Route::get('/{id}', [ReceptionistManagementController::class, 'show']); // Get single receptionist
+        Route::put('/{id}', [ReceptionistManagementController::class, 'update']); // Update receptionist
+        Route::delete('/{id}', [ReceptionistManagementController::class, 'destroy']); // Delete receptionist
     });
     
 });

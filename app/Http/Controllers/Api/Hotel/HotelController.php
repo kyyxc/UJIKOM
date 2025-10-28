@@ -11,7 +11,10 @@ class HotelController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Hotel::with(['amenities', 'images', 'rooms']);
+        $query = Hotel::with(['amenities', 'images', 'rooms'])
+            ->whereHas('owner', function ($q) {
+                $q->where('registration_status', 'approved');
+            });
 
         // Search by name, city, or address
             if ($request->has('search') && $request->search) {
@@ -20,7 +23,8 @@ class HotelController extends Controller
                     $q->where('name', 'like', '%' . $search . '%')
                         ->orWhere('city', 'like', '%' . $search . '%')
                         ->orWhere('address', 'like', '%' . $search . '%')
-                        ->orWhere('state_province', 'like', '%' . $search . '%');
+                        ->orWhere('state_province', 'like', '%' . $search . '%')
+                        ->orWhere('country', 'like', '%' . $search . '%');
                 });
             }
 
@@ -200,6 +204,14 @@ class HotelController extends Controller
 
     public function show(Hotel $hotel)
     {
+        // Check if hotel owner is approved
+        if (!$hotel->owner || $hotel->owner->registration_status !== 'approved') {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Hotel not available or owner not approved',
+            ], 404);
+        }
+
         $hotel->load([
             'amenities' => fn($q) => $q->where('type', 'hotel'),
             'images',

@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\Amenity;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\Amenity;
 
 class AmenitySeeder extends Seeder
 {
@@ -13,46 +12,36 @@ class AmenitySeeder extends Seeder
      */
     public function run(): void
     {
-        // Amenities khusus untuk Hotel
-        $hotelAmenities = [
-            'Kolam Renang',
-            'Spa & Sauna',
-            'Gym',
-            'Restoran',
-            'Parkir Gratis',
-            'Bar & Lounge',
-            'Ruang Meeting',
-            'Laundry',
-            'Layanan Antar Jemput',
-            'Resepsionis 24 Jam',
+        $amenities = [
+            // Hotel Amenities
+            ['name' => 'WiFi', 'type' => 'hotel'],
+            ['name' => 'Swimming Pool', 'type' => 'hotel'],
+            ['name' => 'Gym', 'type' => 'hotel'],
+            ['name' => 'Restaurant', 'type' => 'hotel'],
+            ['name' => 'Spa', 'type' => 'hotel'],
+            ['name' => 'Bar', 'type' => 'hotel'],
+            ['name' => 'Parking', 'type' => 'hotel'],
+            ['name' => 'Airport Shuttle', 'type' => 'hotel'],
+            ['name' => 'Conference Room', 'type' => 'hotel'],
+            ['name' => '24/7 Reception', 'type' => 'hotel'],
+            
+            // Room Amenities
+            ['name' => 'Air Conditioning', 'type' => 'room'],
+            ['name' => 'TV', 'type' => 'room'],
+            ['name' => 'Mini Bar', 'type' => 'room'],
+            ['name' => 'Safe Box', 'type' => 'room'],
+            ['name' => 'Coffee Maker', 'type' => 'room'],
+            ['name' => 'Hair Dryer', 'type' => 'room'],
+            ['name' => 'Bathtub', 'type' => 'room'],
+            ['name' => 'Work Desk', 'type' => 'room'],
+            ['name' => 'Balcony', 'type' => 'room'],
+            ['name' => 'Room Service', 'type' => 'room'],
         ];
 
-        foreach ($hotelAmenities as $name) {
-            Amenity::firstOrCreate([
-                'name' => $name,
-                'type' => 'hotel',
-            ]);
+        foreach ($amenities as $amenity) {
+            Amenity::create($amenity);
         }
 
-        // Amenities khusus untuk Room
-        $roomAmenities = [
-            'WiFi Gratis',
-            'AC',
-            'TV Kabel',
-            'Kulkas Mini',
-            'Brankas',
-            'Meja Kerja',
-            'Shower Air Panas',
-            'Pembuat Kopi/Teh',
-            'Setrika',
-            'Peralatan Mandi Gratis',
-        ];
-
-        foreach ($roomAmenities as $name) {
-            Amenity::firstOrCreate([
-                'name' => $name,
-                'type' => 'room',
-            ]);
-        }
+        $this->command->info('Amenities seeded successfully!');
     }
 }

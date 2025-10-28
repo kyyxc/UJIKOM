@@ -22,7 +22,8 @@ class CountryController extends Controller
             $query->where('is_active', true);
         }
 
-        $countries = $query->orderBy('name', 'asc')->get();
+        // Paginate with 12 items per page
+        $countries = $query->orderBy('name', 'asc')->paginate(12);
 
         // Fetch hotel counts grouped by country in one query
         $counts = Hotel::selectRaw('country, COUNT(*) as hotel_count')
@@ -48,6 +49,14 @@ class CountryController extends Controller
             'status' => 'success',
             'message' => 'Get countries',
             'data' => $result,
+            'pagination' => [
+                'current_page' => $countries->currentPage(),
+                'per_page' => $countries->perPage(),
+                'total' => $countries->total(),
+                'last_page' => $countries->lastPage(),
+                'from' => $countries->firstItem(),
+                'to' => $countries->lastItem(),
+            ],
         ], 200);
     }
 }

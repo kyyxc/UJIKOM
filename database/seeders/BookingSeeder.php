@@ -2,89 +2,89 @@
 
 namespace Database\Seeders;
 
-use App\Models\Hotel;
-use App\Models\Room;
-use App\Models\User;
-use App\Models\Receptionist;
-use Carbon\Carbon;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use App\Models\Booking;
+use App\Models\User;
+use App\Models\Room;
+use App\Models\Payment;
+use App\Models\Invoice;
+use Carbon\Carbon;
+use Faker\Factory as Faker;
 
 class BookingSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
-    public function run()
+    public function run(): void
     {
-        $users = User::all();
-        $hotels = Hotel::all();
-        $receptionists = Receptionist::all();
+        $faker = Faker::create();
+        
+        // Get customers (users without admin/owner/receptionist roles)
+        $customers = User::whereDoesntHave('admin')
+            ->whereDoesntHave('owner')
+            ->whereDoesntHave('receptionist')
+            ->get();
 
-        foreach ($hotels as $hotel) {
-            $rooms = Room::where('hotel_id', $hotel->id)->get();
+        $rooms = Room::all();
 
-            foreach ($rooms as $room) {
-                for ($i = 0; $i < 3; $i++) {
-                    // Tentukan apakah booking online atau offline
-                    $isOnline = rand(0, 1) === 1;
+        $statuses = ['pending', 'confirmed', 'checked_in', 'checked_out', 'cancelled'];
+        $paymentMethods = ['credit_card', 'bank_transfer', 'qris', 'gopay', 'shopeepay'];
 
-                    $checkIn = Carbon::today()->addDays(rand(1, 30));
-                    $checkOut = (clone $checkIn)->addDays(rand(1, 7));
-                    $numDays = $checkOut->diffInDays($checkIn);
-                    $totalPrice = $room->price_per_night * ($numDays > 0 ? $numDays : 1);
+        // Create 50 bookings
+        for ($i = 1; $i <= 50; $i++) {
+            $customer = $customers->random();
+            $room = $rooms->random();
+            
+            // Random dates
+            $checkInDate = $faker->dateTimeBetween('-30 days', '+30 days');
+            $checkOutDate = Carbon::instance($checkInDate)->addDays(rand(2, 7));
+            
+            $totalNights = Carbon::instance($checkInDate)->diffInDays($checkOutDate);
+            $totalPrice = $room->price_per_night * $totalNights;
 
-                    if ($isOnline) {
-                        $user = $users->random();
+            $booking = Booking::create([
+                'user_id' => $customer->id,
+                'room_id' => $room->id,
+                'hotel_id' => $room->hotel_id,
+                'guest_name' => $faker->name(),
+                'guest_email' => $customer->email,
+                'guest_phone' => $faker->phoneNumber,
+                'check_in_date' => $checkInDate,
+                'check_out_date' => $checkOutDate,
+                'total_price' => $totalPrice,
+                'status' => $faker->randomElement($statuses),
+                'source' => 'online',
+            ]);
 
-                        // Pastikan guest_name dan guest_email tidak null
-                        $guestName = $user->name ?? explode('@', $user->email)[0] ?? 'Guest_' . rand(1000, 9999);
-                        $guestEmail = $user->email ?? 'guest' . rand(1000, 9999) . '@example.com';
-                        $guestPhone = $user->phone ?? null;
+            // Create payment for confirmed/checked_in/checked_out bookings
+            if (in_array($booking->status, ['confirmed', 'checked_in', 'checked_out'])) {
+                $payment = Payment::create([
+                    'booking_id' => $booking->id,
+                    'amount' => $totalPrice,
+                    'status' => 'paid',
+                    'midtrans_order_id' => 'ORDER-' . now()->format('Ymd') . '-' . str_pad($i, 5, '0', STR_PAD_LEFT),
+                    'midtrans_transaction_id' => 'MIDTRANS-' . strtoupper($faker->bothify('???###???###')),
+                    'midtrans_payment_type' => $faker->randomElement($paymentMethods),
+                    'midtrans_response' => json_encode(['status' => 'success']),
+                    'transaction_date' => $checkInDate,
+                ]);
 
-                        DB::table('bookings')->insert([
-                            'user_id' => $user->id,
-                            'receptionist_id' => null,
-                            'hotel_id' => $hotel->id,
-                            'room_id' => $room->id,
-                            'guest_name' => $guestName,
-                            'guest_email' => $guestEmail,
-                            'guest_phone' => $guestPhone,
-                            'check_in_date' => $checkIn->toDateString(),
-                            'check_out_date' => $checkOut->toDateString(),
-                            'status' => ['pending', 'confirmed', 'checked_in', 'checked_out', 'cancelled'][array_rand([0,1,2,3,4])],
-                            'source' => 'online',
-                            'total_price' => $totalPrice,
-                            'created_at' => now(),
-                            'updated_at' => now(),
-                        ]);
-                    } else {
-                        // Booking offline via receptionist
-                        $receptionist = $receptionists->random();
+                // Create invoice
+                Invoice::create([
+                    'booking_id' => $booking->id,
+                    'payment_id' => $payment->id,
+                    'invoice_number' => 'INV-' . now()->format('Ymd') . '-' . str_pad($i, 3, '0', STR_PAD_LEFT),
+                    'amount' => $totalPrice,
+                    'invoice_date' => $checkInDate,
+                ]);
+            }
 
-                        $guestName = 'Tamu ' . ucfirst(str()->random(5));
-                        $guestEmail = 'guest' . rand(1, 1000) . '@example.com';
-                        $guestPhone = '08' . rand(1000000000, 9999999999);
-
-                        DB::table('bookings')->insert([
-                            'user_id' => null,
-                            'receptionist_id' => $receptionist->id,
-                            'hotel_id' => $hotel->id,
-                            'room_id' => $room->id,
-                            'guest_name' => $guestName,
-                            'guest_email' => $guestEmail,
-                            'guest_phone' => $guestPhone,
-                            'check_in_date' => $checkIn->toDateString(),
-                            'check_out_date' => $checkOut->toDateString(),
-                            'status' => 'booked',
-                            'source' => 'offline',
-                            'total_price' => $totalPrice,
-                            'created_at' => now(),
-                            'updated_at' => now(),
-                        ]);
-                    }
-                }
+            if ($i % 10 == 0) {
+                $this->command->info("Booking {$i} created");
             }
         }
+
+        $this->command->info('Bookings seeded successfully!');
     }
 }
