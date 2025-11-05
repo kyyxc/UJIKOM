@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\Receptionist\ReceptionistDashboardController;
 use App\Http\Controllers\Api\Receptionist\ReceptionistGuestController;
 use App\Http\Controllers\Api\Receptionist\ReceptionistRoomController;
 use App\Http\Controllers\Api\Room\RoomController;
+use App\Http\Controllers\Api\Room\RoomBookingDateController;
 use App\Http\Controllers\Api\UserProfileController;
 
 use App\Models\Payment;
@@ -51,6 +52,9 @@ Route::middleware(['auth:sanctum', 'customer'])->group(function () {
         ], 404);
     });
 
+    // Get room booked dates
+    Route::get('rooms/{id}/booked-dates', [RoomBookingDateController::class, 'getBookedDates']);
+
     // User booking hotels
     Route::apiResource('bookings', BookingController::class)->missing(function () {
         return response()->json([
@@ -68,7 +72,7 @@ Route::middleware(['auth:sanctum', 'customer'])->group(function () {
     Route::get('/invoices/{id}', [InvoiceController::class, 'show']);
 });
 
-//  Test payment with midtrans without deployment
+
 Route::post('/payments/test-success/{payment}', function (Payment $payment) {
     DB::transaction(function () use ($payment) {
         // Update payment
@@ -83,11 +87,6 @@ Route::post('/payments/test-success/{payment}', function (Payment $payment) {
         // Update booking status
         $booking = $payment->booking;
         $booking->update(['status' => 'confirmed']);
-
-        // Update room status → occupied
-        if ($booking->room) {
-            $booking->room->update(['status' => 'occupied']);
-        }
     });
 
     return response()->json([

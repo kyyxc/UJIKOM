@@ -17,6 +17,6 @@ class RoomController extends Controller
 
     public function show(Room $room)
     {
-        return response()->json($room->load(['amenities', 'images', 'hotel']));
+        return response()->json($room->load(['amenities', 'images', 'hotel', 'bookings']));
     }
 }
