@@ -35,18 +35,25 @@ class SessionController extends Controller
 
         if (Auth::attempt($request->only(['email', 'password']))) {
             $token = $user->createToken("dsgjkdflgjkldgege");
+            
+            $userData = [
+                'id' => $user->id,
+                'email' => $user->email,
+                'first_name' => $user->first_name,
+                'last_name' => $user->last_name,
+                'role' => $user->role,
+                'profile' => $user->profile,
+                'token' => $token->plainTextToken,
+            ];
+
+            if ($user->owner) {
+                $userData['owner'] = $user->owner;
+            }
+
             return response()->json([
                 'status' => 'success',
                 'message' => 'Signin success',
-                'user' => [
-                    'id' => $user->id,
-                    'email' => $user->email,
-                    'first_name' => $user->first_name,
-                    'last_name' => $user->last_name,
-                    'role' => $user->role,
-                    'profile' => $user->profile,
-                    'token' => $token->plainTextToken,
-                ],
+                'user' => $userData,
             ], 200);
         }
 
