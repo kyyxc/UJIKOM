@@ -53,7 +53,7 @@ class ReceptionistBookingStatusController extends Controller
 
         $bookings = Booking::with('room')
             ->where('hotel_id', $receptionist->hotel_id)
-
+            ->whereIn('status', ['checked_out', 'checked_in'])
             ->latest()
             ->get();
 

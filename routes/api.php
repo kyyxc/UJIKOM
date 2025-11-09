@@ -44,6 +44,9 @@ Route::middleware(['auth:sanctum', 'customer'])->group(function () {
         ], 404);
     })->withoutMiddleware(['auth:sanctum', 'customer']);
 
+    // Get rooms by hotel
+    Route::get('hotels/{id}/rooms', [HotelController::class, 'getRooms']);
+
     // User get rooms
     Route::apiResource('rooms', RoomController::class)->missing(function () {
         return response()->json([

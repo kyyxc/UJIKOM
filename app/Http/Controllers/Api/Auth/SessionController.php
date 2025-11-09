@@ -46,6 +46,7 @@ class SessionController extends Controller
                 'token' => $token->plainTextToken,
             ];
 
+            // Jika role owner, tambahkan semua field owner termasuk registration_status
             if ($user->owner) {
                 $userData['owner'] = $user->owner;
             }

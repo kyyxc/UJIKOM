@@ -67,7 +67,7 @@ class BookingController extends Controller
             'hotel_id'       => 'required|exists:hotels,id',
             'check_in_date'  => 'required|date|after_or_equal:today',
             'check_out_date' => 'required|date|after:check_in_date',
-            'total_price'    => 'required|numeric|min:0',
+            'total_price'    => 'nullable|numeric|min:0',
         ]);
 
         if ($validator->fails()) {
@@ -80,6 +80,16 @@ class BookingController extends Controller
 
         $user = $request->user();
 
+        // Hitung total_price jika tidak diberikan
+        $totalPrice = $request->total_price;
+        if (!$totalPrice) {
+            $room = \App\Models\Room::findOrFail($request->room_id);
+            $checkIn = new \DateTime($request->check_in_date);
+            $checkOut = new \DateTime($request->check_out_date);
+            $nights = $checkOut->diff($checkIn)->days;
+            $totalPrice = $room->price_per_night * $nights;
+        }
+
         $booking = Booking::create([
             'user_id'        => $user->id,
             'room_id'        => $request->room_id,
@@ -91,7 +101,7 @@ class BookingController extends Controller
             'check_out_date' => $request->check_out_date,
             'status'         => 'pending',
             'source'         => 'online',
-            'total_price'    => $request->total_price,
+            'total_price'    => $totalPrice,
         ]);
 
         $invoiceNumber = 'INV-' . date('Ymd') . '-' . strtoupper(uniqid());

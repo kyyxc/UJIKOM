@@ -17,22 +17,22 @@ class HotelController extends Controller
             });
 
         // Search by name, city, or address
-            if ($request->has('search') && $request->search) {
-                $search = $request->search;
-                $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', '%' . $search . '%')
-                        ->orWhere('city', 'like', '%' . $search . '%')
-                        ->orWhere('address', 'like', '%' . $search . '%')
-                        ->orWhere('state_province', 'like', '%' . $search . '%')
-                        ->orWhere('country', 'like', '%' . $search . '%');
-                });
-            }
+        if ($request->has('search') && $request->search) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('city', 'like', '%' . $search . '%')
+                    ->orWhere('address', 'like', '%' . $search . '%')
+                    ->orWhere('state_province', 'like', '%' . $search . '%')
+                    ->orWhere('country', 'like', '%' . $search . '%');
+            });
+        }
 
         // Filter by check-in and check-out dates (availability)
         if ($request->has('check_in') && $request->has('check_out')) {
             $checkIn = $request->check_in;
             $checkOut = $request->check_out;
-            
+
             // Filter hotels that have available rooms during the date range
             $query->whereHas('rooms', function ($q) use ($checkIn, $checkOut) {
                 $q->where('status', 'available')
@@ -113,19 +113,19 @@ class HotelController extends Controller
             $query->where(function ($q) use ($country) {
                 // Try exact match first
                 $q->where('country', $country)
-                  // Then try case-insensitive LIKE
-                  ->orWhereRaw('LOWER(country) = LOWER(?)', [$country])
-                  // Finally try partial match
-                  ->orWhere('country', 'like', '%' . $country . '%');
+                    // Then try case-insensitive LIKE
+                    ->orWhereRaw('LOWER(country) = LOWER(?)', [$country])
+                    // Finally try partial match
+                    ->orWhere('country', 'like', '%' . $country . '%');
             });
         }
 
         // Filter by facilities/amenities
         if ($request->has('facilities') && $request->facilities) {
-            $facilities = is_array($request->facilities) 
-                ? $request->facilities 
+            $facilities = is_array($request->facilities)
+                ? $request->facilities
                 : explode(',', $request->facilities);
-            
+
             $query->whereHas('amenities', function ($q) use ($facilities) {
                 $q->whereIn('amenities.id', $facilities);
             }, '=', count($facilities)); // Ensure hotel has ALL specified amenities
@@ -133,10 +133,10 @@ class HotelController extends Controller
 
         // Filter by amenities (alternative name)
         if ($request->has('amenities') && $request->amenities) {
-            $amenities = is_array($request->amenities) 
-                ? $request->amenities 
+            $amenities = is_array($request->amenities)
+                ? $request->amenities
                 : explode(',', $request->amenities);
-            
+
             $query->whereHas('amenities', function ($q) use ($amenities) {
                 $q->whereIn('amenities.id', $amenities);
             });
@@ -345,5 +345,27 @@ class HotelController extends Controller
             'status' => 'success',
             'message' => 'Hotel deleted successfully',
         ]);
+    }
+
+    public function getRooms($id)
+    {
+        $hotel = Hotel::find($id);
+
+        if (!$hotel) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Hotel not found',
+            ], 404);
+        }
+
+        $rooms = $hotel->rooms()
+            ->with(['images', 'amenities'])
+            ->get();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Rooms retrieved successfully',
+            'data' => $rooms,
+        ], 200);
     }
 }
