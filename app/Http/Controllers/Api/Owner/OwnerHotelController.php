@@ -215,15 +215,42 @@ class OwnerHotelController extends Controller
                 'check_in_time' => 'sometimes|date_format:H:i',
                 'check_out_time' => 'sometimes|date_format:H:i',
                 'cancellation_policy' => 'sometimes|string',
+                'amenities' => 'sometimes|array',
+                'amenities.*' => 'exists:amenities,id',
+                'images' => 'sometimes|array',
+                'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
             ]);
 
-            $owner->hotel->update($validated);
+            // Update basic hotel info
+            $hotel = $owner->hotel;
+            $hotel->update($validated);
+
+            // Update amenities if provided
+            if ($request->has('amenities')) {
+                $hotel->amenities()->sync($request->amenities);
+            }
+
+            // Handle images if provided
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $image) {
+                    $path = $image->store('hotels/images', 'public');
+                    $hotel->images()->create([
+                        'image_url' => $path,
+                    ]);
+                }
+            }
+
+            // Reload hotel with relations
+            $hotel->load('amenities', 'images');
+
+            // Reload hotel with relations
+            $hotel->load('amenities', 'images');
 
             return response()->json([
                 'success' => true,
                 'message' => 'Hotel updated successfully',
                 'data' => [
-                    'hotel' => $owner->hotel
+                    'hotel' => $hotel
                 ]
             ], 200);
 

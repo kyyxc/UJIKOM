@@ -30,19 +30,8 @@ Route::middleware(['auth:sanctum', 'receptionist'])->prefix('receptionist')->gro
 
     Route::post('/payments', [ReceptionistBookingController::class, 'payment']);
 
-
-
     // Receptionist get dashboard information
-    Route::prefix('dashboard')->group(function () {
-        Route::get('/stats', [ReceptionistDashboardController::class, 'getDashboardStats']);
-        Route::get('/room-status', [ReceptionistDashboardController::class, 'getRoomStatusData']);
-        Route::get('/reservation-trends', [ReceptionistDashboardController::class, 'getReservationTrends']);
-        Route::get('/payment-methods', [ReceptionistDashboardController::class, 'getPaymentMethodsData']);
-        Route::get('/todays-activities', [ReceptionistDashboardController::class, 'getTodaysActivities']);
-        Route::get('/monthly-revenue', [ReceptionistDashboardController::class, 'getMonthlyRevenue']);
-        Route::get('/occupancy-rate', [ReceptionistDashboardController::class, 'getOccupancyRate']);
-        Route::get('/all', [ReceptionistDashboardController::class, 'getAllDashboardData']);
-    });
+    Route::get('/dashboard', [ReceptionistDashboardController::class, 'getAllDashboardData']);
 
     // Receptionist get info guests
     Route::get('/guests', [ReceptionistGuestController::class, 'index']);

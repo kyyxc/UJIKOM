@@ -25,6 +25,7 @@ class ReceptionistRoomController extends Controller
 
         // Ambil semua kamar di hotel tempat receptionist bekerja
         $rooms = Room::where('hotel_id', $hotelId)
+            ->with(['amenities'])
             ->select('id', 'room_number', 'room_type', 'capacity', 'price_per_night', 'status')
             ->get();
 
@@ -48,7 +49,7 @@ class ReceptionistRoomController extends Controller
 
         $hotelId = $user->receptionist->hotel_id;
 
-        $room = Room::where('hotel_id', $hotelId)->find($id);
+        $room = Room::where('hotel_id', $hotelId)->with(['amenities'])->find($id);
 
         if (!$room) {
             return response()->json([

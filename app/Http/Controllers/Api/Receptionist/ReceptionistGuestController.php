@@ -36,7 +36,7 @@ class ReceptionistGuestController extends Controller
                 'email' => $booking->guest_email ?? $booking->user?->email,
                 'phone' => $booking->guest_phone ?? $booking->user?->phone,
                 'roomNumber' => $booking->room?->room_number ?? '-',
-                'roomType' => $booking->room?->type ?? '-',
+                'roomType' => $booking->room?->room_type ?? '-',
                 'checkInDate' => $booking->check_in_date,
                 'checkOutDate' => $booking->check_out_date,
                 'status' => $booking->status,

@@ -26,8 +26,7 @@ return new class extends Migration
             $table->string('identity_card_file')->nullable(); // KTP
             
             // Status registrasi
-            $table->enum('registration_status', ['pending', 'step_1', 'step_2', 'step_3', 'step_4', 'completed', 'approved', 'rejected'])->default('pending');
-            $table->text('rejection_reason')->nullable();
+             $table->text('rejection_reason')->nullable();
             $table->timestamp('submitted_at')->nullable();
             $table->timestamp('approved_at')->nullable();
         });

@@ -41,7 +41,7 @@ class AdminHotelController extends Controller
             });
         }
 
-        $hotels = $query->paginate(10);
+        $hotels = $query->paginate(12);
 
         return response()->json([
             'status' => 'success',
