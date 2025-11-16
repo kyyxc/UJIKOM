@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\AdminBookingController;
 use App\Http\Controllers\Api\Admin\AdminDashboardController;
 use App\Http\Controllers\Api\Admin\AdminHotelController;
 use App\Http\Controllers\Api\Admin\AdminUserController;
@@ -37,7 +38,7 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
         Route::get('/all', [AdminDashboardController::class, 'getAllDashboardData']);
     });
 
-    Route::apiResource('bookings', BookingController::class)->missing(function () {
+    Route::apiResource('bookings', AdminBookingController::class)->missing(function () {
         return response()->json([
             'status'  => 'error',
             'message' => 'Booking not found',

@@ -12,16 +12,20 @@ class BookingController extends Controller
 {
     public function index(Request $request)
     {
+        $user = $request->user();
+        
         $query = Booking::with(['guest', 'hotel', 'room.images'])
-            ->where('status', '!=', 'booked')->latest(); // ❌ exclude booked
+            ->where('user_id', $user->id)
+            ->where('status', '!=', 'booked')
+            ->latest();
 
         // Optional search
         if ($request->has('search') && !empty($request->search)) {
             $search = $request->search;
-            $query->whereHas('guest', function ($q) use ($search) {
-                $q->where('first_name', 'like', "%$search%")
-                    ->orWhere('last_name', 'like', "%$search%")
-                    ->orWhere('email', 'like', "%$search%");
+            $query->where(function ($q) use ($search) {
+                $q->where('guest_name', 'like', "%$search%")
+                    ->orWhere('guest_email', 'like', "%$search%")
+                    ->orWhere('guest_phone', 'like', "%$search%");
             });
         }
 
@@ -51,7 +55,8 @@ class BookingController extends Controller
             'room.images',
             'room.amenities',
             'guest',
-            'payment'
+            'payment',
+            'invoice'
         ])->findOrFail($id);
 
         return response()->json([

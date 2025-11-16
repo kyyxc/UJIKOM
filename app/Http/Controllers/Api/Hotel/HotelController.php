@@ -225,7 +225,7 @@ class HotelController extends Controller
         $groupedRooms = [];
 
         foreach ($roomTypes as $type) {
-            // Get the latest room for each type, prioritizing rooms without bookings today
+            // Prioritize available rooms without bookings today
             $room = $hotel->rooms()
                 ->where('room_type', $type)
                 ->with(['amenities', 'images'])
@@ -235,6 +235,8 @@ class HotelController extends Controller
                           ->where('check_out_date', '>=', $today);
                     })->whereIn('status', ['pending', 'confirmed', 'checked_in', 'booked']);
                 }])
+                // Order by: 1. Status available first, 2. No active bookings, 3. Latest created
+                ->orderByRaw("CASE WHEN status = 'available' THEN 0 ELSE 1 END")
                 ->orderByRaw('(SELECT COUNT(*) FROM bookings 
                     WHERE bookings.room_id = rooms.id 
                     AND bookings.check_in_date <= ? 
