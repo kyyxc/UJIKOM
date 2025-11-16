@@ -47,6 +47,9 @@ Route::middleware(['auth:sanctum', 'customer'])->group(function () {
     // Get rooms by hotel
     Route::get('hotels/{id}/rooms', [HotelController::class, 'getRooms']);
 
+    // Get available rooms by type with check-in and check-out dates
+    Route::get('hotels/{id}/available-rooms', [HotelController::class, 'getAvailableRoomsByType']);
+
     // User get rooms
     Route::apiResource('rooms', RoomController::class)->missing(function () {
         return response()->json([
@@ -74,7 +77,6 @@ Route::middleware(['auth:sanctum', 'customer'])->group(function () {
     Route::get('/invoices', [InvoiceController::class, 'index']);
     Route::get('/invoices/{id}', [InvoiceController::class, 'show']);
 });
-
 
 Route::post('/payments/test-success/{payment}', function (Payment $payment) {
     DB::transaction(function () use ($payment) {
